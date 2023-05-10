@@ -2,5 +2,4 @@ numpy
 pandas
 nltk
 scikit-learn
-tensorflow==2.9
 tqdm
