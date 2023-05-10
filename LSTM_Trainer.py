@@ -1,3 +1,24 @@
+##################
+#   PARAMETERS   #
+##################
+# Paramètres modifiables Model
+vocab_size = 50000
+embedding_dim = 128
+lstm_units = 256
+num_layers = 2
+dropout_rate = 0.05
+# Paramètres modifiables Data
+n_min = 2
+n_max = 10
+# Paramètres modifiables Training
+epochs = 5
+batch_size = 258
+learning_rate = 0.001
+test_size = 0.1
+##################
+#   PARAMETERS   #
+##################
+
 import logging
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
@@ -42,6 +63,8 @@ def create_vocabulary(corpus: List[str], vocab_size: int) -> dict:
 
     # Compte les occurrences de chaque token
     token_counts = Counter(tokens)
+
+    print(len(token_counts))
 
     # Conserve les vocab_size premiers tokens les plus fréquents
     most_common_tokens = token_counts.most_common(vocab_size - 2)
@@ -109,26 +132,7 @@ def create_training_data(corpus, vocabulary, n_min, n_max):
     X = pad_sequences(X, maxlen=n_max, padding='pre', value=vocabulary['<PAD>'])
     return X, np.array(y)
 
-##################
-#   PARAMETERS   #
-##################
-# Paramètres modifiables Model
-vocab_size = 10000
-embedding_dim = 128
-lstm_units = 256
-num_layers = 2
-dropout_rate = 0.1
-# Paramètres modifiables Data
-n_min = 2
-n_max = 10
-# Paramètres modifiables Training
-epochs = 1
-batch_size = 2048
-learning_rate = 0.01
-test_size = 0.1
-##################
-#   PARAMETERS   #
-##################
+
 
 ##################
 #      DATA      #
@@ -145,7 +149,7 @@ logging.info("Loaded.")
 logging.info("Preprocess Training Data...")
 vocabulary = create_vocabulary(corpus, vocab_size)
 X, y  = create_training_data(corpus, vocabulary, n_min, n_max)
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=test_size, random_state=42)
+X_train, X_val, y_train, y_val = X, X[:int(test_size*len(X))], y, y[:int(test_size*len(y))]
 del X
 del y
 logging.info("Done.")
