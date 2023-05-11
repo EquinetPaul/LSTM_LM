@@ -45,6 +45,7 @@ from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 # Utils
 from tqdm import tqdm
+import pickle
 logging.info("Loaded.")
 
 
@@ -59,12 +60,10 @@ def preprocess_text(text: str) -> str:
 
 def create_vocabulary(corpus: List[str], vocab_size: int) -> dict:
     # Tokenize le corpus
-    tokens = [word.lower() for sentence in tqdm(corpus) for word in sentence.split()]
+    tokens = [word for sentence in tqdm(corpus) for word in preprocess_text(sentence).split()]
 
     # Compte les occurrences de chaque token
     token_counts = Counter(tokens)
-
-    print(len(token_counts))
 
     # Conserve les vocab_size premiers tokens les plus fréquents
     most_common_tokens = token_counts.most_common(vocab_size - 2)
@@ -121,7 +120,8 @@ def create_training_data(corpus, vocabulary, n_min, n_max):
     X, y = [], []
 
     for sentence in tqdm(corpus):
-        tokenized_sentence = [vocabulary.get(token, vocabulary['<OOV>']) for token in preprocess_text(sentence).split()]
+        sentence = preprocess_text(sentence)
+        tokenized_sentence = [vocabulary.get(token, vocabulary['<OOV>']) for token in sentence.split()]
         for n in range(n_min, n_max + 1):
             ngrams = list(nltk.ngrams(tokenized_sentence, n))
             for ngram in ngrams:
@@ -131,7 +131,6 @@ def create_training_data(corpus, vocabulary, n_min, n_max):
     logging.info("Padding Sequences...")
     X = pad_sequences(X, maxlen=n_max, padding='pre', value=vocabulary['<PAD>'])
     return X, np.array(y)
-
 
 
 ##################
@@ -146,13 +145,18 @@ logging.info("Loaded.")
 #    TRAINING    #
 #      DATA      #
 ##################
-logging.info("Preprocess Training Data...")
+logging.info("Creating Vocabulary...")
 vocabulary = create_vocabulary(corpus, vocab_size)
+
+logging.info("Saving Vocabulary...")
+file = open("vocab.pickle", "wb")
+pickle.dump(vocabulary, file)
+file.close()
+logging.info("Saved.")
+logging.info("Creating Training Data...")
 X, y  = create_training_data(corpus, vocabulary, n_min, n_max)
 X_train, X_val, y_train, y_val = X, X[:int(test_size*len(X))], y, y[:int(test_size*len(y))]
-del X
-del y
-logging.info("Done.")
+logging.info("Created.")
 
 ##################
 #    TRAINING    #
