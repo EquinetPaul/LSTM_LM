@@ -3,7 +3,6 @@ import pickle
 import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-
 def load_model_and_vocabulary(model_path, vocab_path):
     model = tf.keras.models.load_model(model_path)
     with open(vocab_path, "rb") as file:
@@ -37,6 +36,7 @@ def generate_sentence(model, vocabulary, input_sentence, n_words=5, temperature=
 
 model_path = "LSTM_LM"
 vocab_path = "vocab.pickle"
+n_max = 10
 
 model, vocabulary = load_model_and_vocabulary(model_path, vocab_path)
 
