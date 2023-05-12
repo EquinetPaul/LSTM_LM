@@ -15,22 +15,31 @@ def preprocess_text(text: str) -> str:
     text = " ".join(text.strip().split())
     return text
 
-def generate_sentence(model, vocabulary, input_sentence, n_words=5, temperature=1.0):
+def generate_sentence(model, vocabulary, input_sentence, min_words=10, temperature=1):
     reverse_vocabulary = {v: k for k, v in vocabulary.items()}
     input_sentence = preprocess_text(input_sentence)
 
-    for _ in range(n_words):
+    word_count = len(input_sentence.split())
+
+    while word_count <= min_words:
         tokenized_sentence = [vocabulary.get(token, vocabulary['<OOV>']) for token in input_sentence.split()]
         padded_sentence = pad_sequences([tokenized_sentence], maxlen=n_max, padding='pre', value=vocabulary['<PAD>'])
 
-        predictions = model.predict(padded_sentence)[0]
+        predictions = model.predict(padded_sentence, verbose=3)[0]
+        predictions[0] = 0
+        predictions[1] = 0
         predictions = np.array([np.power(p, 1 / temperature) for p in predictions])
         predictions = predictions / np.sum(predictions)
+
 
         next_word_idx = np.random.choice(range(len(predictions)), p=predictions)
         next_word = reverse_vocabulary.get(next_word_idx, '<OOV>')
 
         input_sentence += ' ' + next_word
+
+        word_count = len(input_sentence.split())
+        if word_count > min_words and input_sentence[-1] not in [".", "!", "?"]:
+            min_words += 1
 
     return input_sentence
 
