@@ -6,7 +6,7 @@ vocab_size = 50000
 embedding_dim = 128
 lstm_units = 256
 num_layers = 2
-dropout_rate = 0.05
+dropout_rate = 0.2
 # Paramètres modifiables Data
 n_min = 2
 n_max = 10
@@ -76,7 +76,7 @@ def create_vocabulary(corpus: List[str], vocab_size: int) -> dict:
 
     return vocabulary
 
-def create_lstm_model(vocab_size, embedding_dim, lstm_units, num_layers, dropout_rate, learning_rate):
+def create_lstm_model(vocab_size, embedding_dim, lstm_units, num_layers, dropout_rate, learning_rate, dropout_rate):
     model = Sequential()
     model.add(Embedding(vocab_size, embedding_dim, input_length=None))
 
@@ -84,6 +84,7 @@ def create_lstm_model(vocab_size, embedding_dim, lstm_units, num_layers, dropout
         model.add(LSTM(lstm_units, return_sequences=True, dropout=dropout_rate))
 
     model.add(LSTM(lstm_units, dropout=dropout_rate))
+    model.add(tf.keras.layers.Dropout(dropout_rate))
     model.add(Dense(vocab_size, activation='softmax'))
 
     optimizer = Adam(learning_rate=learning_rate)
