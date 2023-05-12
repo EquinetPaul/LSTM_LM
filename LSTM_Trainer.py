@@ -46,6 +46,7 @@ from sklearn.model_selection import train_test_split
 # Utils
 from tqdm import tqdm
 import pickle
+import re
 logging.info("Loaded.")
 
 
@@ -116,8 +117,22 @@ def sequences_to_sentences(sequence, vocabulary):
         sentences.append(' '.join(sentence))
     return sentences
 
+def remove_empty_elements(input_list):
+    return [element for element in input_list if element]
+
+def split_text(text: str):
+    # Utilise l'expression régulière pour diviser le texte par '.', '!' et '?'
+    split_regex = r'(?<=[.!?])\s*'
+    result = re.split(split_regex, text)
+    return result
+
 def create_training_data(corpus, vocabulary, n_min, n_max):
     X, y = [], []
+
+    corpus_full = []
+    for sentence in corpus:
+        corpus_full += split_text(sentence)
+    corpus = remove_empty_elements(corpus_full)
 
     for sentence in tqdm(corpus):
         sentence = preprocess_text(sentence)
@@ -130,6 +145,8 @@ def create_training_data(corpus, vocabulary, n_min, n_max):
 
     logging.info("Padding Sequences...")
     X = pad_sequences(X, maxlen=n_max, padding='pre', value=vocabulary['<PAD>'])
+
+
     return X, np.array(y)
 
 
@@ -137,7 +154,7 @@ def create_training_data(corpus, vocabulary, n_min, n_max):
 #      DATA      #
 ##################
 logging.info("Loading Data...")
-df = pd.read_csv("macron.csv", sep=";", encoding="utf-8")
+df = pd.read_csv("../macron.csv", sep=";", encoding="utf-8")
 corpus = df["speech"].to_list()
 logging.info("Loaded.")
 
