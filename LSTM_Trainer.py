@@ -76,7 +76,7 @@ def create_vocabulary(corpus: List[str], vocab_size: int) -> dict:
 
     return vocabulary
 
-def create_lstm_model(vocab_size, embedding_dim, lstm_units, num_layers, dropout_rate, learning_rate, dropout_rate):
+def create_lstm_model(vocab_size, embedding_dim, lstm_units, num_layers, dropout_rate, learning_rate):
     model = Sequential()
     model.add(Embedding(vocab_size, embedding_dim, input_length=None))
 
